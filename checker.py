@@ -2,7 +2,7 @@ import groq
 import chess
 
 # Groq API Key
-GROQ_API_KEY = "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"
+GROQ_API_KEY = ""
 
 # Initialize Groq client
 client = groq.Client(api_key=GROQ_API_KEY)
