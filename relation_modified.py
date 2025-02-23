@@ -22,9 +22,7 @@ lc0 = chess.engine.SimpleEngine.popen_uci(LCO_PATH)
 # Define board colors
 custom_colors = {
     "square light": "#EEEED2",
-    "square dark": "#769656",
-    "square light lastmove": "#FFD700",  # Gold highlight
-    "square dark lastmove": "#DAA520",   # Darker gold highlight
+    "square dark": "#769656"
 }
 
 # Initialize board
@@ -32,13 +30,9 @@ board = chess.Board()
 
 # Pygame setup
 pygame.init()
-WIDTH, HEIGHT = 800, 800  # Extra space for move history
+WIDTH, HEIGHT = 800, 800
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Engine vs Engine")
-
-# Pygame fonts
-pygame.font.init()
-font = pygame.font.SysFont("Arial", 20)
 
 # Neo4j Setup
 NEO4J_URI = os.getenv('NEO_URI')
@@ -57,32 +51,6 @@ game_id = str(int(time.time()))  # Unique game ID
 execute_query("CREATE (:Game {id: $game_id, timestamp: $timestamp})", 
               {"game_id": game_id, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")})
 
-# Move history tracking
-move_history = []
-
-# def render_board(last_move=None, eval_score=None):
-#     """Convert the board into an image and display it using pygame."""
-#     svg_board = chess.svg.board(board=board, size=WIDTH-200, colors=custom_colors, lastmove=last_move)
-#     png_bytes = cairosvg.svg2png(bytestring=svg_board.encode("utf-8"))
-#     image = pygame.image.load(io.BytesIO(png_bytes))
-    
-#     screen.fill((255, 255, 255))  # Clear screen
-#     screen.blit(image, (0, 0))
-
-#     # Draw move history
-#     y_offset = 20
-#     for i, move in enumerate(move_history):
-#         move_text = font.render(f"{i+1}. {move}", True, (0, 0, 0))
-#         screen.blit(move_text, (WIDTH-180, y_offset))
-#         y_offset += 25
-
-#     # Display evaluation score
-#     if eval_score:
-#         eval_text = font.render(f"Eval: {eval_score}", True, (255, 0, 0))
-#         screen.blit(eval_text, (WIDTH-180, HEIGHT-50))
-
-#     pygame.display.flip()
-
 def render_board():
     """Convert the board into an image and display it using pygame."""
     svg_board = chess.svg.board(board=board, size=WIDTH, colors=custom_colors)
@@ -92,25 +60,25 @@ def render_board():
     pygame.display.flip()
 
 def save_move(engine_name, move, eval_score, time_taken, fen_before, fen_after):
-    """Save each move to Neo4j as a relationship between board positions."""
+    """Save each move to Neo4j with a relationship named after the engine."""
     
-    query = """
-    MERGE (before:Position {fen: $fen_before})
-    MERGE (after:Position {fen: $fen_after})
-    MERGE (before)-[:MADE_MOVE {game_id: $game_id, engine: $engine, move: $move, 
-            evaluation: $eval, time_taken: $time}]->(after)
+    relation_name = f"{engine_name.upper()}_MOVE"  # Example: STOCKFISH_MOVE, LCO_MOVE
+
+    query = f"""
+    MERGE (before:Position {{fen: $fen_before}})
+    MERGE (after:Position {{fen: $fen_after}})
+    MERGE (before)-[:{relation_name} {{game_id: $game_id, move: $move, 
+            evaluation: $eval, time_taken: $time}}]->(after)
     """
     
     execute_query(query, {
         "fen_before": fen_before,
         "fen_after": fen_after,
         "game_id": game_id,
-        "engine": engine_name,
         "move": move.uci(),
         "eval": eval_score if eval_score else "N/A",
         "time": round(time_taken, 3)
     })
-    move_history.append(f"{engine_name}: {move.uci()} ({eval_score})")
     print(f"✅ Move saved to Neo4j: {move.uci()} by {engine_name}")
 
 # Game loop
@@ -125,15 +93,14 @@ while running and not board.is_game_over():
     # Lc0 plays first
     print("\nLc0 is thinking...")
     start_time = time.time()
-    lc0_result = lc0.play(board, chess.engine.Limit(time=0.1))
+    lc0_result = lc0.play(board, chess.engine.Limit(time=2.0))
     end_time = time.time()
-    
+
     fen_before = board.fen()
     board.push(lc0_result.move)
     fen_after = board.fen()
-    
+
     eval_score = lc0_result.info.get("score", None)
-    # render_board(last_move=lc0_result.move, eval_score=eval_score)
     render_board()
     save_move("Lc0", lc0_result.move, eval_score, end_time - start_time, fen_before, fen_after)
 
@@ -143,15 +110,14 @@ while running and not board.is_game_over():
     # Stockfish plays next
     print("\nStockfish is thinking...")
     start_time = time.time()
-    stockfish_result = stockfish.play(board, chess.engine.Limit(time=0.01))
+    stockfish_result = stockfish.play(board, chess.engine.Limit(time=2.0))
     end_time = time.time()
-    
+
     fen_before = board.fen()
     board.push(stockfish_result.move)
     fen_after = board.fen()
-    
+
     eval_score = stockfish_result.info.get("score", None)
-    # render_board(last_move=stockfish_result.move, eval_score=eval_score)
     render_board()
     save_move("Stockfish", stockfish_result.move, eval_score, end_time - start_time, fen_before, fen_after)
 
