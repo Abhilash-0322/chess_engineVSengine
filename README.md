@@ -34,7 +34,7 @@ A fully functional **Chess AI GUI** where **Stockfish** and **Lc0** battle it ou
    - [Lc0](https://lczero.org/)
 
 ---
-Lco Might Require Cuda Setup as Well Follow The Documentation.
+Lco Might Require CUDA Setup as Well Follow The Documentation.
 
 ---
 
@@ -100,4 +100,4 @@ The project **stores and visualizes chess moves as a graph**:
 
 Found a bug or have a feature request? Feel free to open an issue or submit a PR!
 
-👨‍💻 **Made by Abhilash-0322** 🚀
+👨‍💻 **Made by [Abhilash-0322](https://github.com/Abhilash-0322)** 🚀
