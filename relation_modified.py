@@ -62,7 +62,7 @@ def render_board():
 def save_move(engine_name, move, eval_score, time_taken, fen_before, fen_after):
     """Save each move to Neo4j with a relationship named after the engine."""
     
-    relation_name = f"{engine_name.upper()}_MOVE"  # Example: STOCKFISH_MOVE, LCO_MOVE
+    relation_name = f"{engine_name.upper()}_MOVE"
 
     query = f"""
     MERGE (before:Position {{fen: $fen_before}})
@@ -93,7 +93,7 @@ while running and not board.is_game_over():
     # Lc0 plays first
     print("\nLc0 is thinking...")
     start_time = time.time()
-    lc0_result = lc0.play(board, chess.engine.Limit(time=2.0))
+    lc0_result = lc0.play(board, chess.engine.Limit(time=0.8))
     end_time = time.time()
 
     fen_before = board.fen()
@@ -110,7 +110,7 @@ while running and not board.is_game_over():
     # Stockfish plays next
     print("\nStockfish is thinking...")
     start_time = time.time()
-    stockfish_result = stockfish.play(board, chess.engine.Limit(time=2.0))
+    stockfish_result = stockfish.play(board, chess.engine.Limit(time=0.2))
     end_time = time.time()
 
     fen_before = board.fen()
