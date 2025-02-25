@@ -35,6 +35,7 @@ A fully functional **Chess AI GUI** where **Stockfish** and **Lc0** battle it ou
 
 ---
 Lco Might Require Cuda Setup as Well Follow The Documentation.
+
 ---
 
 2. **Clone this Repository**
