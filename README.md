@@ -31,7 +31,10 @@ A fully functional **Chess AI GUI** where **Stockfish** and **Lc0** battle it ou
 1. **Download Chess Engines**
 
    - [Stockfish](https://stockfishchess.org/download/)
-   - [Lc0](https://lczero.org/downloads/)
+   - [Lc0](https://lczero.org/)
+
+---
+Lco Might Require Cuda Setup as Well Follow The Documentation.
 
 2. **Clone this Repository**
 
@@ -46,7 +49,7 @@ A fully functional **Chess AI GUI** where **Stockfish** and **Lc0** battle it ou
    pip install -r requirements.txt
    ```
 
-4. **Update Paths in the Script** Edit the `STOCKFISH_PATH` and `LCO_PATH` variables in the script to point to your local chess engine executables.
+4. **Update Paths in the Script** Edit the `STOCKFISH_PATH` and `LCO_PATH` variables in the script to point to your local chess engine executables or use Cloud Engines.
 
 5. **Start the Chess Match**
 
